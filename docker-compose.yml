@@ -10,7 +10,7 @@ services:
       - mongo_data:/data/db:ro
 
   s3:
-    image: minio/minio
+    image: minio/minio:RELEASE.2024-01-11T06-21-14Z
     ports:
       - "9000:9000"
       - "9001:9001"
