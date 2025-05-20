@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  db:
+    image: mongo:latest
+    container_name: db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  s3:
+    image: minio/minio
+    ports:
+      - "9000:9000" # API
+      - "9001:9001" # Console
+    environment:
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD=minio123
+    command: server /data --console-address ":9001"
+    volumes:
+      - s3_data:/data
+
+  app:
+    build:
+      context: ./backend/video_hosting
+      dockerfile: Dockerfile
+    container_name: spring-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - s3
+
+  vue-dev:
+    build:
+      context: ./frontend/videohost
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend/videohost:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5173" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      - app
+
+volumes:
+  mongo_data:
+  s3_data:
