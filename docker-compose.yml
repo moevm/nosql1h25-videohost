@@ -39,7 +39,7 @@ services:
     ports:
       - "5173:5173"
     volumes:
-      - ./frontend/videohost:/app
+      - ./frontend/videohost:/app:ro
       - /app/node_modules
     environment:
       - NODE_ENV=development
