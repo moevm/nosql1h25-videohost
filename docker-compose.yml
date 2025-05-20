@@ -8,6 +8,7 @@ services:
       - "27017"
     volumes:
       - mongo_data:/data/db:ro
+    restart: unless-stopped
 
   s3:
     image: minio/minio:RELEASE.2025-04-22T22-12-26Z
@@ -20,6 +21,7 @@ services:
     command: server /data --console-address ":9001"
     volumes:
       - s3_data:/data:ro
+    restart: unless-stopped
 
   app:
     build:
@@ -31,6 +33,7 @@ services:
     depends_on:
       - db
       - s3
+    restart: unless-stopped
 
   vue-dev:
     build:
@@ -40,7 +43,7 @@ services:
       - "127.0.0.1:5173:5173"
     volumes:
       - ./frontend/videohost:/app:ro
-      - node_modules:/app/node_modules:ro
+      - node_modules:/app/node_modules
     environment:
       - NODE_ENV=development
     healthcheck:
@@ -50,6 +53,7 @@ services:
       retries: 3
     depends_on:
       - app
+    restart: unless-stopped
 
 volumes:
   mongo_data:
