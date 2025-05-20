@@ -12,6 +12,7 @@ import { Profile } from '@/pages/profile'
 import { ImportExport } from '@/pages/importExport'
 import { Users } from '@/pages/users'
 import { HideVideo } from '@/pages/hideVideo'
+import { NotFound } from '@/pages/notFound'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -53,6 +54,11 @@ const router = createRouter({
       path: '/login',
       name: 'signIn',
       component: SignIn,
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: '404',
+      component: NotFound,
     },
     {
       path: '/registration',
