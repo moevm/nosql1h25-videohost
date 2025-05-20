@@ -48,3 +48,7 @@ volumes:
   mongo_data:  # For MongoDB
   s3_data:     # For MinIO
   node_modules: # For frontend node_modules
+
+networks:
+  neo4j_network:
+    driver: bridge
