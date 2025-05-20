@@ -7,7 +7,7 @@ services:
     expose:
       - "27017"
     volumes:
-      - mongo_data:/data/db:rw  # MongoDB needs write access
+      - mongo_data:/data/db:ro  # MongoDB needs write access
     restart: unless-stopped
 
   s3:
@@ -20,7 +20,7 @@ services:
       - MINIO_ROOT_PASSWORD=minio123
     command: server /data --console-address ":9001"
     volumes:
-      - s3_data:/data:rw  # MinIO needs write access
+      - s3_data:/data:ro  # MinIO needs write access
     restart: unless-stopped
 
   app:
