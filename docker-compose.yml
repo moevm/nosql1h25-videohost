@@ -40,7 +40,7 @@ services:
       - "127.0.0.1:5173:5173"
     volumes:
       - ./frontend/videohost:/app:ro
-      - /app/node_modules
+      - node_modules:/app/node_modules:ro
     environment:
       - NODE_ENV=development
     healthcheck:
@@ -54,3 +54,4 @@ services:
 volumes:
   mongo_data:
   s3_data:
+  node_modules:
