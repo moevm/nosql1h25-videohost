@@ -8,6 +8,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.dto.ApplicationData;
+import org.example.exception.DataTransferExportException;
+import org.example.exception.DataTransferImportException;
 import org.example.model.*;
 import org.example.repository.*;
 import org.example.service.api.DataTransferService;
@@ -36,51 +38,58 @@ class DataTransferServiceImpl implements DataTransferService {
 
     @Override
     @Transactional
-    public byte[] exportAllData(DataTransferService.Format format) throws IOException {
+    public byte[] exportAllData(DataTransferService.Format format) {
         Map<String, Object> allData = new LinkedHashMap<>();
 
-        allData.put("users", userRepository.findAll());
-        allData.put("videos", videoRepository.findAll());
-        allData.put("subscriptions", subscriptionRepository.findAll());
-        allData.put("comments", commentRepository.findAll());
-        allData.put("reactions", reactionRepository.findAll());
+        try {
+            allData.put("users", userRepository.findAll());
+            allData.put("videos", videoRepository.findAll());
+            allData.put("subscriptions", subscriptionRepository.findAll());
+            allData.put("comments", commentRepository.findAll());
+            allData.put("reactions", reactionRepository.findAll());
 
-        return switch (format) {
-            case JSON -> objectMapper.writeValueAsBytes(allData);
-            case XML -> xmlMapper.writeValueAsBytes(allData);
-        };
+            return switch (format) {
+                case JSON -> objectMapper.writeValueAsBytes(allData);
+                case XML -> xmlMapper.writeValueAsBytes(allData);
+            };
+        } catch (IOException e) {
+            throw new DataTransferExportException(e.getMessage());
+        }
     }
 
     @Override
     @Transactional
-    public void importAllData(byte[] data, Format format) throws IOException {
+    public void importAllData(byte[] data, Format format) {
+        try {
+            userRepository.deleteAll();
+            videoRepository.deleteAll();
+            subscriptionRepository.deleteAll();
+            commentRepository.deleteAll();
+            reactionRepository.deleteAll();
 
-        userRepository.deleteAll();
-        videoRepository.deleteAll();
-        subscriptionRepository.deleteAll();
-        commentRepository.deleteAll();
-        reactionRepository.deleteAll();
+            ApplicationData importedData = parseData(data, format);
+            resolveReferences(importedData);
+            if (importedData.getUsers() != null) {
+                userRepository.saveAll(importedData.getUsers());
+            }
 
-        ApplicationData importedData = parseData(data, format);
-        resolveReferences(importedData);
-        if (importedData.getUsers() != null) {
-            userRepository.saveAll(importedData.getUsers());
-        }
+            if (importedData.getVideos() != null) {
+                videoRepository.saveAll(importedData.getVideos());
+            }
 
-        if (importedData.getVideos() != null) {
-            videoRepository.saveAll(importedData.getVideos());
-        }
+            if (importedData.getSubscriptions() != null) {
+                subscriptionRepository.saveAll(importedData.getSubscriptions());
+            }
 
-        if (importedData.getSubscriptions() != null) {
-            subscriptionRepository.saveAll(importedData.getSubscriptions());
-        }
+            if (importedData.getComments() != null) {
+                commentRepository.saveAll(importedData.getComments());
+            }
 
-        if (importedData.getComments() != null) {
-            commentRepository.saveAll(importedData.getComments());
-        }
-
-        if (importedData.getReactions() != null) {
-            reactionRepository.saveAll(importedData.getReactions());
+            if (importedData.getReactions() != null) {
+                reactionRepository.saveAll(importedData.getReactions());
+            }
+        } catch (IOException e) {
+            throw new DataTransferImportException("Failed to import data: " + e.getMessage());
         }
     }
 

@@ -90,4 +90,19 @@ public class UserExceptionHandler {
     ResponseEntity<ErrorResponse> mailSendHandler(MailSendException e) {
         return new ResponseEntity<>(new ErrorResponse(e.getMessage()), HttpStatus.BAD_GATEWAY);
     }
+
+    @ExceptionHandler(TakingAwayRightsYourselfException.class)
+    ResponseEntity<ErrorResponse> takingAwayRightsYourselfHandler(TakingAwayRightsYourselfException e) {
+        return new ResponseEntity<>(new ErrorResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DataTransferImportException.class)
+    ResponseEntity<ErrorResponse> dataTransferImportHandler(DataTransferImportException e) {
+        return new ResponseEntity<>(new ErrorResponse(e.getMessage()), HttpStatus.BAD_GATEWAY);
+    }
+
+    @ExceptionHandler(DataTransferExportException.class)
+    ResponseEntity<ErrorResponse> dataTransferExportHandler(DataTransferExportException e) {
+        return new ResponseEntity<>(new ErrorResponse(e.getMessage()), HttpStatus.BAD_GATEWAY);
+    }
 }

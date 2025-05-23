@@ -2,6 +2,7 @@ package org.example.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.exception.TakingAwayRightsYourselfException;
 import org.example.exception.UserBannedException;
 import org.example.exception.UserNotFoundException;
 import org.example.model.RoleEnum;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -19,6 +21,7 @@ import java.util.List;
 class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final UserAuthServiceImpl userAuthService;
 
     @Override
     public UserData getUserById(String userId) throws UserNotFoundException {
@@ -54,6 +57,11 @@ class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void removeRoleFromUser(String userId, RoleEnum role) throws UserNotFoundException {
+
+        if (Objects.equals(userId, userAuthService.getUserId())) {
+            throw new TakingAwayRightsYourselfException();
+        }
+
         UserData user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
