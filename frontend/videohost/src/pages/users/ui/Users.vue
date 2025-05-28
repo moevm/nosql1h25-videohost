@@ -344,7 +344,7 @@ onMounted(async () => {
               </button>
             </td>
 
-            <td v-if="me?.roles && me?.roles?.includes('ADMIN') && !user.blocked" class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+            <td v-if="me?.roles && me?.roles?.includes('ADMIN') && !user.blocked && me.username !== user.username" class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               <button
                 @click="block=true; blockUser(user.userId)"
                 class="px-3 py-1 rounded-md text-sm font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -353,7 +353,7 @@ onMounted(async () => {
               </button>
             </td>
             
-            <td v-else-if="me?.roles && me?.roles.includes('ADMIN') && user.blocked" class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+            <td v-else-if="me?.roles && me?.roles.includes('ADMIN') && user.blocked && me.username !== user.username" class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               <button
                 @click="block=false; blockUser(user.userId)"
                 class="px-3 py-1 rounded-md text-sm font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -362,7 +362,7 @@ onMounted(async () => {
               </button>
             </td>
 
-            <td v-if="user.roles && !user.roles.includes('ADMIN')" class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+            <td v-if="user.roles && !user.roles.includes('ADMIN') && me.username !== user.username" class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               <button
                 @click="grantAdmin(user.userId)"
                 v-if="!user.roles.includes('ADMIN')"
@@ -375,7 +375,7 @@ onMounted(async () => {
             <td v-else class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               <button
                 @click="removeGrantAdmin(user.userId)"
-                v-if="user.roles.includes('ADMIN')"
+                v-if="user.roles.includes('ADMIN') && me.username !== user.username"
                 class="px-3 py-1 rounded-md text-sm font-medium transition-colors bg-blue-100 text-blue-700 hover:bg-blue-200 w-fit"
               >
                 Лишить прав

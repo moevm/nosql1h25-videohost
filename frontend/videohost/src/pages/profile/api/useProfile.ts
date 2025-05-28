@@ -138,7 +138,9 @@ export function useProfileActions(
     fd.append('title', title)
     fd.append('description', description)
     tags.forEach((tag) => fd.append('tags', tag))
-    if (file) fd.append('file', file)
+    if (file && file.type === "video/mp4"){
+      fd.append('file', file)
+    }else return error("Обновление", "файл не выбран или не подходит под формат mp4")
 
     const response = await fetch(`${import.meta.env.VITE_API}video/upload/${route.params.id}`, {
       method: 'POST',
