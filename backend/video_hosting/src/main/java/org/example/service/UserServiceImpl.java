@@ -9,6 +9,8 @@ import org.example.model.RoleEnum;
 import org.example.model.UserData;
 import org.example.repository.UserRepository;
 import org.example.service.api.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,8 +32,8 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserData> getAllUser() {
-        return userRepository.findAll();
+    public Page<UserData> getAllUser(Pageable pageable) {
+        return userRepository.findByBlockedFalse(pageable);
     }
 
     @Override

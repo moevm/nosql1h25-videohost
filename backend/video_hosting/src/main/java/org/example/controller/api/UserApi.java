@@ -1,8 +1,11 @@
 package org.example.controller.api;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.example.dto.UpdateUserDTO;
 import org.example.dto.UserDTO;
 import org.example.exception.UserNotFoundException;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +22,8 @@ public interface UserApi {
     ResponseEntity<UserDTO> getUserById(@PathVariable String userId) throws UserNotFoundException;
 
     @GetMapping(value = "/all")
-    List<UserDTO> getAllUser();
+    Page<UserDTO> getAllUser(@RequestParam(defaultValue = "0") int page,
+                             @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size);
 
     @PatchMapping("/update/{userId}")
     ResponseEntity<UserDTO> updateUser(@PathVariable String userId, @RequestBody UpdateUserDTO updateUserDTO) throws UserNotFoundException;
