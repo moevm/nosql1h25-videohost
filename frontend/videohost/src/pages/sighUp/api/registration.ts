@@ -1,8 +1,7 @@
 import { useNotify } from '@/shared/helpers/useNotify'
-import type { Router } from 'vue-router'
 import type ILoginData from '../model'
 
-const registration = async (loginData: ILoginData, router: Router) => {
+const registration = async (loginData: ILoginData) => {
   const { error, success } = useNotify()
 
   const response = await fetch(`${import.meta.env.VITE_API}auth/register`, {
@@ -14,7 +13,13 @@ const registration = async (loginData: ILoginData, router: Router) => {
   })
 
   if (!response.ok) {
-    return error('Регистрация', 'Ошибка регистрации')
+    const errorText = await response.text()
+
+    const parser = new DOMParser()
+    const xmlDoc = parser.parseFromString(errorText, "text/xml")
+    const message = xmlDoc.getElementsByTagName("message")[0]?.textContent
+    
+    return error('Регистрация', message || 'Ошибка регистрации')
   }
 
   success('Регистрация', 'Проверьте вашу почту, на нее пришло сообщение')
