@@ -2,6 +2,7 @@ package org.example.controller.api;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.example.dto.ResetPasswordDTO;
 import org.example.dto.request.AuthRequest;
 import org.example.dto.response.AuthResponse;
 import org.example.exception.UserNotFoundException;
@@ -23,4 +24,13 @@ public interface AuthApi {
 
     @GetMapping("/accountVerification/{token}")
     ResponseEntity<Void> verifyAccount(@PathVariable String token);
+
+    @PatchMapping("/reset")
+    ResponseEntity<Void> resetPasswordUrl(@RequestParam String usernameOrEmail) throws UserNotFoundException;
+
+    @PatchMapping("/resetPassword/{token}")
+    ResponseEntity<Void> reset(@RequestParam String token, @RequestBody ResetPasswordDTO resetPasswordDTO);
+
+    @GetMapping("/reset/{token}")
+    ResponseEntity<Void> resetPage(@PathVariable String token);
 }
