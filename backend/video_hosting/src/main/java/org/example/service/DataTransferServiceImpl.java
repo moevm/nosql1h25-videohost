@@ -59,16 +59,17 @@ class DataTransferServiceImpl implements DataTransferService {
 
     @Override
     @Transactional
-    public void importAllData(byte[] data, Format format) {
+    public void importAllData(byte[] data, Format format) throws DataTransferImportException {
         try {
+            ApplicationData importedData = parseData(data, format);
+            resolveReferences(importedData);
+
             userRepository.deleteAll();
             videoRepository.deleteAll();
             subscriptionRepository.deleteAll();
             commentRepository.deleteAll();
             reactionRepository.deleteAll();
 
-            ApplicationData importedData = parseData(data, format);
-            resolveReferences(importedData);
             if (importedData.getUsers() != null) {
                 userRepository.saveAll(importedData.getUsers());
             }
