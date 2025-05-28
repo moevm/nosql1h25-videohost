@@ -1,10 +1,13 @@
 package org.example.controller.api;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.example.dto.UpdateVideoDTO;
 import org.example.dto.VideoDTO;
 import org.example.exception.UserNotFoundException;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +23,10 @@ public interface VideoApi {
                                        @RequestParam List<String> tags, @RequestPart("file") MultipartFile file) throws Exception;
 
     @GetMapping("/subscription/{userId}")
-    List<VideoDTO> getSubscriptionVideos(@PathVariable String userId) throws UserNotFoundException;
+    Page<VideoDTO> getSubscriptionVideos(@PathVariable String userId,
+                                         @RequestParam(defaultValue = "0") int page,
+                                         @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size)
+            throws UserNotFoundException;
 
     @GetMapping("/download/{fileName}")
     ResponseEntity<Resource> downloadVideo(@PathVariable String fileName);
@@ -32,7 +38,8 @@ public interface VideoApi {
     ResponseEntity<VideoDTO> getVideo(@PathVariable String videoId);
 
     @GetMapping("/all")
-    List<VideoDTO> getAllVideos();
+    Page<VideoDTO> getAllVideos(@RequestParam(defaultValue = "0") int page,
+                                @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size);
 
     @DeleteMapping("/delete/{videoId}")
     ResponseEntity<Void> deleteVideo(@PathVariable String videoId) throws UserNotFoundException;

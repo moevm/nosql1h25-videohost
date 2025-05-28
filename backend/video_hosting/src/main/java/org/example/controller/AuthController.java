@@ -4,9 +4,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.example.controller.api.AuthApi;
+import org.example.dto.ResetPasswordDTO;
 import org.example.dto.request.AuthRequest;
 import org.example.dto.response.AuthResponse;
 import org.example.exception.UserNotFoundException;
+import org.example.service.UserAuthServiceImpl;
 import org.example.service.api.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +23,10 @@ import java.net.URI;
 class AuthController implements AuthApi {
 
     private final AuthService authService;
+    private final UserAuthServiceImpl userAuthService;
 
     @Override
     public ResponseEntity<Void> register(AuthRequest request) {
-
         authService.registration(request);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
@@ -45,6 +47,25 @@ class AuthController implements AuthApi {
         authService.verifyAccount(token);
         return ResponseEntity.status(HttpStatus.FOUND)
                 .location(URI.create("http://localhost:5173/successRegister/" + token))
+                .build();
+    }
+
+    @Override
+    public ResponseEntity<Void> resetPasswordUrl(String usernameOrEmail) throws UserNotFoundException {
+        authService.resetPasswordUrl(usernameOrEmail);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Void> reset(String token, ResetPasswordDTO resetPasswordDTO) {
+        authService.resetPassword(token, resetPasswordDTO.getPassword());
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Void> resetPage(String token) {
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create("http://localhost:5173/NewPassword/" + token))
                 .build();
     }
 }

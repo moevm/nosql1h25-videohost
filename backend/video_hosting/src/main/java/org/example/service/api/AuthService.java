@@ -11,4 +11,8 @@ public interface AuthService {
     AuthResponse login(AuthRequest request) throws UserNotFoundException;
 
     void verifyAccount(String token);
+
+    void resetPasswordUrl(String usernameOrEmail) throws UserNotFoundException;
+
+    void resetPassword(String token, String password);
 }

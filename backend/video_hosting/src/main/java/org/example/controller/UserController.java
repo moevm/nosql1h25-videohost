@@ -8,6 +8,10 @@ import org.example.dto.UserDTO;
 import org.example.exception.UserNotFoundException;
 import org.example.service.UserAuthServiceImpl;
 import org.example.service.api.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -36,11 +40,13 @@ class UserController implements UserApi {
     }
 
     @Override
-    public List<UserDTO> getAllUser() {
-        return userService.getAllUser()
-                .stream()
-                .map(userMapper::map)
-                .toList();
+    public Page<UserDTO> getAllUser(int page, int size) {
+        Pageable pageable = PageRequest.of(
+                page,
+                size
+        );
+        return userService.getAllUser(pageable)
+                .map(userMapper::map);
     }
 
     @Override
