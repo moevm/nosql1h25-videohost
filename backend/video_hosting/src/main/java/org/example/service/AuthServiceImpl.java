@@ -104,6 +104,40 @@ class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public void resetPasswordUrl(String usernameOrEmail) throws UserNotFoundException {
+        Optional<UserData> userOptionalUsername = userRepository.findByUsername(usernameOrEmail);
+        Optional<UserData> userOptionalEmail = userRepository.findByEmail(usernameOrEmail);
+        UserData user;
+
+        if (userOptionalUsername.isPresent()) {
+            user = userOptionalUsername.get();
+        } else if (userOptionalEmail.isPresent()) {
+            user = userOptionalEmail.get();
+        } else {
+            throw new UserNotFoundException();
+        }
+
+        String token = generateVerificationToken(user);
+        mailService.sendMail(user.getEmail(),
+                "Reset Password",
+                "click on the below url to reset your password : " +
+                        "http://localhost:8080/api/auth/reset/" + token);
+    }
+
+    @Override
+    public void resetPassword(String token, String password) {
+        VerificationTokenData verificationToken = verificationTokenRepository.findByToken(token)
+                .orElseThrow(VerificationTokenNotFoundException::new);
+        String userId = verificationToken.getUser().getId();
+
+        UserData user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException(userId));
+
+        user.setPassword(passwordEncoder.encode(password));
+
+        userRepository.save(user);
+    }
+
+    @Override
     public void verifyAccount(String token) {
         VerificationTokenData verificationToken = verificationTokenRepository.findByToken(token)
                 .orElseThrow(VerificationTokenNotFoundException::new);
