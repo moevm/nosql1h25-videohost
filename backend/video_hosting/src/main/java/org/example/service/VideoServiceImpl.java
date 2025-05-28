@@ -16,6 +16,8 @@ import org.example.repository.UserRepository;
 import org.example.repository.VideoRepository;
 import org.example.service.api.S3Service;
 import org.example.service.api.VideoService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -97,8 +99,8 @@ class VideoServiceImpl implements VideoService {
     }
 
     @Override
-    public List<VideoData> getAllVideos() {
-        return videoRepository.findByIsVideoHiddenFalse();
+    public Page<VideoData> getAllVideos(Pageable pageable) {
+        return videoRepository.findByIsVideoHiddenFalse(pageable);
     }
 
     @Override
@@ -111,7 +113,7 @@ class VideoServiceImpl implements VideoService {
 
     @Override
     @Transactional
-    public List<VideoData> getSubscriptionVideos(String userId) throws UserNotFoundException {
+    public Page<VideoData> getSubscriptionVideos(String userId, Pageable pageable) throws UserNotFoundException {
         UserData userData = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
@@ -122,13 +124,10 @@ class VideoServiceImpl implements VideoService {
                 .toList();
 
         if (followings.isEmpty()) {
-            return List.of();
+            return Page.empty();
         }
 
-        List<VideoData> videos = videoRepository.findByUserInAndIsVideoHiddenFalse(followings);
-        videos.sort(Comparator.comparing(VideoData::getUploadDate).reversed());
-
-        return videos;
+        return videoRepository.findByUserInAndIsVideoHiddenFalse(followings, pageable);
     }
 
     @Override

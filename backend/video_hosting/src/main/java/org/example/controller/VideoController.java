@@ -11,6 +11,10 @@ import org.example.service.UserAuthServiceImpl;
 import org.example.service.api.S3Service;
 import org.example.service.api.VideoService;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -41,10 +45,14 @@ class VideoController implements VideoApi {
     }
 
     @Override
-    public List<VideoDTO> getSubscriptionVideos(String userId) throws UserNotFoundException {
-        return videoService.getSubscriptionVideos(userId).stream()
-                .map(videoMapper::map)
-                .toList();
+    public Page<VideoDTO> getSubscriptionVideos(String userId, int page, int size) throws UserNotFoundException {
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(Sort.Direction.DESC, "uploadDate")
+        );
+        return videoService.getSubscriptionVideos(userId, pageable)
+                .map(videoMapper::map);
     }
 
     @Override
@@ -64,10 +72,14 @@ class VideoController implements VideoApi {
     }
 
     @Override
-    public List<VideoDTO> getAllVideos() {
-        return videoService.getAllVideos().stream()
-                .map(videoMapper::map)
-                .toList();
+    public Page<VideoDTO> getAllVideos(int page, int size) {
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(Sort.Direction.DESC, "uploadDate") // Сортировка по полю uploadDate
+        );
+        return videoService.getAllVideos(pageable)
+                .map(videoMapper::map);
     }
 
     @Override
