@@ -46,12 +46,12 @@ const loginData = ref<ILoginData>({
       </form>
 
       <div class="flex flex-col items-center space-y-3 pt-4 border-t border-gray-200">
-        <!-- <router-link
+        <router-link
           to="/resetPassword"
           class="text-sm text-blue-600 hover:text-blue-800 transition-colors"
         >
           Забыли пароль?
-        </router-link> -->
+        </router-link>
 
         <router-link
           to="/registration"
