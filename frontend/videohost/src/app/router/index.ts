@@ -13,6 +13,7 @@ import { ImportExport } from '@/pages/importExport'
 import { Users } from '@/pages/users'
 import { HideVideo } from '@/pages/hideVideo'
 import { NotFound } from '@/pages/notFound'
+import { Statistic } from '@/pages/statistic'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -46,6 +47,11 @@ const router = createRouter({
         {
           path: '/hideVideo',
           component: HideVideo,
+          meta: { requiresAuth: true },
+        },
+        {
+          path: '/statistic',
+          component: Statistic,
           meta: { requiresAuth: true },
         },
       ],

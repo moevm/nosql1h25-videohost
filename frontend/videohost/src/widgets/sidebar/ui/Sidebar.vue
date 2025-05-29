@@ -95,6 +95,12 @@ onMounted(async () => {
             >
               <router-link class="hover:bg-blue-700" to="/hideVideo"> Скрыть видео </router-link>
             </li>
+            
+            <li
+              class="flex items-center hover:bg-blue-700 p-2 rounded-lg transition-colors cursor-pointer"
+            >
+              <router-link class="hover:bg-blue-700" to="/statistic"> Посмотреть статистику </router-link>
+            </li>
           </ul>
         </div>
       </div>
