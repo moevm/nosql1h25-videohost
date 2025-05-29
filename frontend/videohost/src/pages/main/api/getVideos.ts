@@ -1,9 +1,9 @@
 import type { Ref } from 'vue'
 
-const getVideos = async (id: string, showAllVideos: Ref) => {
+const getVideos = async (id: string, showAllVideos: Ref, page: Ref) => {
   const url = showAllVideos.value
-    ? 'http://localhost:8080/api/video/all'
-    : `http://localhost:8080/api/video/subscription/${id}`
+    ? `http://localhost:8080/api/video/all?page=${page.value}&size=${5}`
+    : `http://localhost:8080/api/video/subscription/${id}?page=${page.value}&size=${5}`
 
   
   if (localStorage.getItem('token')) { 
@@ -14,13 +14,15 @@ const getVideos = async (id: string, showAllVideos: Ref) => {
       },
     })
   
-    return await response.json()
+    const data = await response.json()
+    return data.content
     
   }else{
     const response = await fetch(url, {
       method: 'GET'    })
   
-    return await response.json()
+    const data = await response.json()
+    return data.content
   }
   
 }
