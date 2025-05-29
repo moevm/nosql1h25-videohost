@@ -10,19 +10,34 @@ const { error, success } = useNotify()
 const users = ref([])
 const me = ref()
 
+const currentPage = ref(0) 
+const totalPages = ref(0)
+
 const getUsers = async () => {
   
   if (localStorage.getItem('token')) { 
-    const response = await fetch(`${import.meta.env.VITE_API}user/all`, {
+    const response = await fetch(`${import.meta.env.VITE_API}user/all?page=${currentPage.value}&size=${5}`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     })
-    users.value = await response.json()
+    const data = await response.json()
+    totalPages.value = data.totalPages
+    users.value = data.content
   } else {
-    const response = await fetch(`${import.meta.env.VITE_API}user/all`, {
+    const response = await fetch(`${import.meta.env.VITE_API}user/all?page=${currentPage.value}&size=${5}`, {
     })
-    users.value = await response.json()
+    const data = await response.json()
+    totalPages.value = data.totalPages
+    users.value = data.content
   }
+}
+
+const changePage = async (page: number) => {
+  if (page < 0 || page >= totalPages.value) return
+  currentPage.value = page
   
+  
+  const data = await getUsers()
+  totalPages.value = data.totalPages
 }
 
 const subscribe = async (userId: string) => {
@@ -365,7 +380,7 @@ onMounted(async () => {
             <td v-if="user.roles && !user.roles.includes('ADMIN') && me.username !== user.username" class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               <button
                 @click="grantAdmin(user.userId)"
-                v-if="!user.roles.includes('ADMIN')"
+                v-if="!user.roles.includes('ADMIN') && me?.roles.includes('ADMIN')"
                 class="px-3 py-1 rounded-md text-sm font-medium transition-colors bg-blue-100 text-blue-700 hover:bg-blue-200 w-fit"
               >
                 Сделать админом
@@ -375,7 +390,7 @@ onMounted(async () => {
             <td v-else class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               <button
                 @click="removeGrantAdmin(user.userId)"
-                v-if="user.roles.includes('ADMIN') && me.username !== user.username"
+                v-if="user.roles.includes('ADMIN') && me.username !== user.username && me?.roles.includes('ADMIN')"
                 class="px-3 py-1 rounded-md text-sm font-medium transition-colors bg-blue-100 text-blue-700 hover:bg-blue-200 w-fit"
               >
                 Лишить прав
@@ -386,4 +401,27 @@ onMounted(async () => {
       </table>
     </div>
   </div>
-</template>
+  
+  
+  <div class="mt-6 flex items-center justify-center gap-4">
+    <button
+      :disabled="currentPage === 0"
+      @click="changePage(currentPage - 1)"
+      class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      Назад
+    </button>
+  
+    <span class="text-gray-600 text-lg">
+      Страница {{ currentPage + 1 }} из {{ totalPages }}
+    </span>
+  
+    <button
+      :disabled="currentPage >= totalPages - 1"
+      @click="changePage(currentPage + 1)"
+      class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      Вперёд
+    </button>
+  </div>
+</template> 
