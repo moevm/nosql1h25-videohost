@@ -1,15 +1,13 @@
 import { useNotify } from '@/shared/helpers/useNotify'
-import type { IresetPassword } from '../model'
 
-const resetPassword = async (loginData: IresetPassword) => {
+const resetPassword = async (username: string) => {
   const { error, success } = useNotify()
 
-  const response = await fetch(`${import.meta.env.VITE_API}auth/update`, {
-    method: 'POST',
+  const response = await fetch(`${import.meta.env.VITE_API}auth/reset?usernameOrEmail=${username}`, {
+    method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(loginData),
   })
 
   if (!response.ok) {
