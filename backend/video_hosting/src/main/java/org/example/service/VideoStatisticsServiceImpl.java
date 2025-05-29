@@ -67,17 +67,17 @@ class VideoStatisticsServiceImpl implements VideoStatisticsService {
         }
 
         if (filter.getUploadedAfter() != null || filter.getUploadedBefore() != null) {
-            criteria.and("uploadDate");
-
+            Criteria dateCriteria = new Criteria("uploadDate");
             if (filter.getUploadedAfter() != null) {
                 LocalDateTime date = LocalDate.parse(filter.getUploadedAfter(), formatter).atStartOfDay();
-                criteria.gte(date);
+                dateCriteria.gte(date);
             }
 
             if (filter.getUploadedBefore() != null) {
-                LocalDateTime beforeDate = LocalDate.parse(filter.getUploadedBefore(), formatter).atTime(LocalTime.MAX);
-                criteria.lte(beforeDate);
+                LocalDateTime beforeDate = LocalDate.parse(filter.getUploadedBefore(), formatter).atStartOfDay();
+                dateCriteria.lte(beforeDate);
             }
+            criteria.andOperator(dateCriteria);
         }
 
         if (filter.getTags() != null && !filter.getTags().isEmpty()) {
