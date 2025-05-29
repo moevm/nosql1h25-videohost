@@ -28,7 +28,7 @@ public interface AuthApi {
     @PatchMapping("/reset")
     ResponseEntity<Void> resetPasswordUrl(@RequestParam String usernameOrEmail) throws UserNotFoundException;
 
-    @PatchMapping("/resetPassword/{token}")
+    @PatchMapping("/resetPassword")
     ResponseEntity<Void> reset(@RequestParam String token, @RequestBody ResetPasswordDTO resetPasswordDTO);
 
     @GetMapping("/reset/{token}")
