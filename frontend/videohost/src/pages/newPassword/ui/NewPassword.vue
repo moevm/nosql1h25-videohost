@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 import newPassword from '../api/newPassword'
 
+const route = useRoute()
 const router = useRouter()
 const password = ref('')
 </script>
@@ -30,9 +31,10 @@ const password = ref('')
           <h1 class="text-3xl font-bold text-gray-800">Введите новый пароль</h1>
         </div>
 
-        <form @submit.prevent="newPassword(password, router)" class="space-y-4">
+        <form @submit.prevent="newPassword(password, route.params.id, router)" class="space-y-4">
           <input
             type="password"
+            v-model="password"
             placeholder="Пароль"
             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2"
           />

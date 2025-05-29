@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import type { Ref } from 'vue'
 
 import { useFormData } from '@/shared/helpers/useFormData'
 import getMe from '@/shared/api/getMe'
@@ -15,6 +16,8 @@ const { formatDate } = useFormData()
 const videos = ref<IVideo[]>([])
 const showAllVideos = ref(true)
 const isAuth = ref<boolean>(false)
+const currentPage = ref(0) 
+const totalPages = ref(0)
 
 const me = ref<IMe>({
   userId: '',
@@ -27,15 +30,51 @@ const me = ref<IMe>({
 })
 
 const toggleVideos = async () => {
+  currentPage.value = 0
+  totalPages.value = 0
+  
   showAllVideos.value = !showAllVideos.value
-  videos.value = await getVideos(me.value.userId, showAllVideos)
+  videos.value = await getVideos(me.value.userId, showAllVideos, currentPage)
 }
 
 onMounted(async () => {
   me.value = await getMe()
-  videos.value = await getVideos(me.value?.userId, showAllVideos)
+  videos.value = await getVideos(me.value?.userId, showAllVideos, currentPage)
 
   isAuth.value = await getMe(true)
+  
+  
+  console.log(videos.value)
+  
+  const getVideoss = async (id: string, showAllVideos: Ref, page: Ref) => {
+    const url = showAllVideos.value
+      ? `http://localhost:8080/api/video/all?page=${page.value}&size=${5}`
+      : `http://localhost:8080/api/video/subscription/${id}?page=${page.value}&size=${5}`
+  
+    
+    if (localStorage.getItem('token')) { 
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      })
+    
+      const data = await response.json()
+      return data
+      
+    }else{
+      const response = await fetch(url, {
+        method: 'GET'    })
+    
+      const data = await response.json()
+      return data
+    }
+  }
+  
+  
+  const data = await getVideoss(me.value?.userId, showAllVideos, currentPage)
+  totalPages.value = data.totalPages
 })
 
 const formData = ref({
@@ -59,9 +98,47 @@ const formatDateSecond = (dateString) => {
   return `${month}.${day}.${year}`
 }
 
+const changePage = async (page: number) => {
+  if (page < 0 || page >= totalPages.value) return
+  currentPage.value = page
+  videos.value = await getVideos(me.value?.userId, showAllVideos, currentPage)
+  
+  const getVideoss = async (id: string, showAllVideos: Ref, page: Ref) => {
+    const url = showAllVideos.value
+      ? `http://localhost:8080/api/video/all?page=${page.value}&size=${5}`
+      : `http://localhost:8080/api/video/subscription/${id}?page=${page.value}&size=${5}`
+  
+    
+    if (localStorage.getItem('token')) { 
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      })
+    
+      const data = await response.json()
+      return data
+      
+    }else{
+      const response = await fetch(url, {
+        method: 'GET'    })
+    
+      const data = await response.json()
+      return data
+    }
+  }
+  
+  const data = await getVideoss(me.value?.userId, showAllVideos, currentPage)
+  totalPages.value = data.totalPages
+}
+
+
 const showParams = async () => {
   const registeredAfter = formatDateSecond(formData.value.endDate)
   const registeredBefore = formatDateSecond(formData.value.startDate)
+  
+  currentPage.value = 0
   
   if (localStorage.getItem('token')) { 
     const response = await fetch(
@@ -73,6 +150,7 @@ const showParams = async () => {
           description: formData.value.text2.toLowerCase(),
           minViews: formData.value.number1,
           maxViews: formData.value.number2,
+          page: currentPage.value.toString()
         }),
       {
         method: 'GET',
@@ -83,8 +161,9 @@ const showParams = async () => {
     )
   
     const data = await response.json()
-    videos.value = data
-  }else{
+    videos.value = data.videos
+    totalPages.value = data.totalPages
+  } else {
     const response = await fetch(
       `${import.meta.env.VITE_API}search/videos?` +
         new URLSearchParams({
@@ -94,6 +173,7 @@ const showParams = async () => {
           description: formData.value.text2.toLowerCase(),
           minViews: formData.value.number1,
           maxViews: formData.value.number2,
+          page: currentPage.value.toString()
         }),
       {
         method: 'GET',
@@ -101,9 +181,9 @@ const showParams = async () => {
     )
   
     const data = await response.json()
-    videos.value = data
+    videos.value = data.videos
+    totalPages.value = data.totalPages
   }
-
 }
 </script>
 
@@ -137,14 +217,7 @@ const showParams = async () => {
         placeholder="Описание"
         class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors w-full"
       />
-      <!-- <input
-      type="text"
-      v-model="formData.text3"
-      placeholder="Хештеги"
-      class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors w-full"
-    /> -->
 
-      <!-- Числовые поля -->
       <input
         type="number"
         v-model="formData.number1"
@@ -243,7 +316,7 @@ const showParams = async () => {
                     d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
                   />
                 </svg>
-                <span class="font-medium">{{ video.views }}</span>
+                <span class="font-medium">{{ video?.views }}</span>
               </div>
 
               <div class="flex items-center gap-1.5 text-green-600">
@@ -255,7 +328,7 @@ const showParams = async () => {
                     d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"
                   />
                 </svg>
-                <span class="font-medium">{{ video.reactions.likeCount }}</span>
+                <span class="font-medium">{{ video?.reactions?.likeCount }}</span>
               </div>
 
               <div class="flex items-center gap-1.5 text-red-600">
@@ -269,7 +342,7 @@ const showParams = async () => {
                     />
                   </svg>
                 </div>
-                <span class="font-medium">{{ video.reactions.dislikeCount }}</span>
+                <span class="font-medium">{{ video?.reactions?.dislikeCount }}</span>
               </div>
 
               <div class="flex items-center gap-1.5 text-purple-600">
@@ -281,12 +354,35 @@ const showParams = async () => {
                     d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                   />
                 </svg>
-                <span class="font-medium">{{ video.comments.length }}</span>
+                <span class="font-medium">{{ video?.comments?.length }}</span>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+  </div>  
+  
+  <div class="mt-6 flex items-center justify-center gap-4">
+    <button
+      :disabled="currentPage === 0"
+      @click="changePage(currentPage - 1)"
+      class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      Назад
+    </button>
+  
+    <span class="text-gray-600 text-lg">
+      Страница {{ currentPage + 1 }} из {{ totalPages }}
+    </span>
+  
+    <button
+      :disabled="currentPage >= totalPages - 1"
+      @click="changePage(currentPage + 1)"
+      class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      Вперёд
+    </button>
   </div>
+
 </template>
