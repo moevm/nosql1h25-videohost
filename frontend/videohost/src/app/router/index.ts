@@ -13,7 +13,7 @@ import { ImportExport } from '@/pages/importExport'
 import { Users } from '@/pages/users'
 import { HideVideo } from '@/pages/hideVideo'
 import { NotFound } from '@/pages/notFound'
-import { Statistic } from '@/pages/statistic'
+import { Statistic } from '@/pages/statisctic'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
